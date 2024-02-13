@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -186,22 +187,16 @@ public class MemberService {
         return optionalMember.get();
     }
 
-    //멤버도메인 우선 리팩토링 로직
-    //쿼리문 개선으로 페이징 처리된 멤버리스트를 가져오도록 리팩토링 해야함
+    //내가 구독한 멤버 회
     public Page<Member> findMyMembers(int page, int size, String authenticatedEmail) {
-        List<Subscribe> subscribes = subscribeRepository.findBySubscriber(findVerifiedMemberByEmail(authenticatedEmail));
-        List<Member> subscribingMembers = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+        Member subscriber = findVerifiedMemberByEmail(authenticatedEmail);
 
-        for(Subscribe subscribe : subscribes) {
-            Member subscribingMember = subscribe.getSubscribedMember();
-            subscribingMembers.add(subscribingMember);
-        }
+        Page<Member> pageContent = subscribeRepository
+            .findBySubscriber(subscriber, pageable)
+            .map(Subscribe::getSubscribedMember);
 
-        int offset = page * size;
-        int toIndex = Math.min(offset+size, subscribingMembers.size());
-        List<Member> pageContent = subscribingMembers.subList(offset, toIndex);
-
-        return new PageImpl<>(pageContent, PageRequest.of(page, size), subscribingMembers.size());
+        return pageContent;
     }
 
     public Page<BestCuratorDto> findBestCurators(int page, int size) {
