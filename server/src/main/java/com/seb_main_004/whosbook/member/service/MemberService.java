@@ -11,7 +11,6 @@ import com.seb_main_004.whosbook.subscribe.entity.Subscribe;
 import com.seb_main_004.whosbook.subscribe.repository.SubscribeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -169,6 +167,33 @@ public class MemberService {
         return memberRepository.save(findMember);
     }
 
+    //총 회원 수 조회(관리자 전용)
+    public Long findTotalMembers(String email){
+        if(email.equals("admin@email.com")){
+            return memberRepository.count();
+        }
+        throw new BusinessLogicException(ExceptionCode.MEMBER_NO_HAVE_AUTHORIZATION);
+    }
+
+    //가장 많은 구독자를 보유한 멤버 조회(관리자 전용)
+    public Member findMemberByMostSubscription(String email){
+        if(email.equals("admin@email.com")) {
+            Long mostSubscribedMemberId = subscribeRepository.findMostSubscribedMemberId();
+
+            return memberRepository.findByMemberId(mostSubscribedMemberId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND));
+        }
+        throw new BusinessLogicException(ExceptionCode.MEMBER_NO_HAVE_AUTHORIZATION);
+    }
+
+    //가장 많은 게시글을 작성한 멤버 조회(관리자 전용)
+    public List<Member> findMemberByMostCuration(String email){
+        if(email.equals("admin@email.com")) {
+            return memberRepository.findMemberWithMostCurations();
+        }
+        throw new BusinessLogicException(ExceptionCode.MEMBER_NO_HAVE_AUTHORIZATION);
+    }
+
     public Member findVerifiedMemberByEmail(String email){
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         if(optionalMember.isEmpty()) {
@@ -187,7 +212,7 @@ public class MemberService {
         return optionalMember.get();
     }
 
-    //내가 구독한 멤버 회
+    //내가 구독한 회원 조회
     public Page<Member> findMyMembers(int page, int size, String authenticatedEmail) {
         Pageable pageable = PageRequest.of(page, size);
         Member subscriber = findVerifiedMemberByEmail(authenticatedEmail);
@@ -203,6 +228,7 @@ public class MemberService {
         return memberRepository.findBestCuratorsTestV2(PageRequest.of(page, size));
     }
 
+    //구독여부 확인
     public boolean findIsSubscribed(String authenticatedEmail, Member otherMember) {
         Optional<Subscribe> optionalSubscribe = subscribeRepository.findBySubscriberAndSubscribedMember(findVerifiedMemberByEmail(authenticatedEmail), otherMember);
         if(optionalSubscribe.isPresent()) return true;
@@ -227,7 +253,6 @@ public class MemberService {
         memberRepository.save(member);
         }
 }
-
 
 
 
