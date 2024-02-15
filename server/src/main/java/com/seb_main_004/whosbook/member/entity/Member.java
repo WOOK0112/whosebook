@@ -63,19 +63,19 @@ public class Member {
     private List<String> roles = new ArrayList<>();
 
     //큐레이션과 연관관계
-    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Curation> curations = new ArrayList<>();
 
     //like와 연관관계
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CurationLike> likeList= new ArrayList<>();
 
     //구독 연관관계: 날 구독한 멤버 리스트
-    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Subscribe> subscribedMembers = new ArrayList<>();
 
     //구독 연관관계: 내가 구독한 멤버 리스트
-    @OneToMany(mappedBy = "subscribedMember", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "subscribedMember", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Subscribe> subscribers = new ArrayList<>();
 
     @Getter
