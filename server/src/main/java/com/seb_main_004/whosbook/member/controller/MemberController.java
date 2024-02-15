@@ -99,6 +99,23 @@ public class MemberController {
         return new ResponseEntity(memberMapperClass.memberToMemberResponseDto(findMember), HttpStatus.OK);
     }
 
+    //관리자 페이지 조회
+    @GetMapping("/adminpage")
+    public ResponseEntity getAdminPage(Authentication authentication) {
+        if(authentication == null){
+            throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
+        }
+        String userEmail = authentication.getPrincipal().toString();
+
+        Long totalMembers = memberService.findTotalMembers(userEmail);
+        Member mostSubsripedMember = memberService.findMemberByMostSubscription(userEmail);
+        List<Member> mostCurationMembers = memberService.findMemberByMostCuration(userEmail);
+        Long totalCurations = curationService.findTotalCurations(userEmail);
+
+        return new ResponseEntity(memberMapperClass.adminResponseDto(totalMembers, mostSubsripedMember, mostCurationMembers, totalCurations)
+            , HttpStatus.OK);
+    }
+
     //타 유저 마이페이지 조회
     @GetMapping("/{member-id}")
     public ResponseEntity getOtherMemberPage(@Valid @PathVariable("member-id") long otherMemberId, HttpServletRequest request) {
