@@ -126,6 +126,14 @@ public class CurationService {
         log.info("# Curation ID : {} 삭제되었습니다.", curation.getCurationId());
     }
 
+    //총 게시글 조회(관리자 전용)
+    public Long findTotalCurations(String email) {
+        if(email.equals("admin@email.com")){
+            return curationRepository.count();
+        }
+        throw new BusinessLogicException(ExceptionCode.MEMBER_NO_HAVE_AUTHORIZATION);
+    }
+
     public Curation getCuration(long curationId, String authenticatedEmail) {
 
         Curation curation = findVerifiedCurationById(curationId);
