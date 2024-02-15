@@ -54,6 +54,16 @@ public class MemberMapperClass {
         }
     }
 
+    public AdminResponseDto adminResponseDto(Long totalMembers, Member mostSubsripedMember,
+    List<Member> mostCurationMembers, Long totalCurations) {
+    return AdminResponseDto.builder()
+        .totalMembers(totalMembers)
+        .mostSubsripedMember(mostSubsripedMember)
+        .mostCurationMembers(mostCurationMembers)
+        .totalCurations(totalCurations)
+        .build();
+    }
+
     public MemberResponseDto memberToMemberResponseDto(Member member) {
         return MemberResponseDto.builder()
                 .memberId(member.getMemberId())
