@@ -1,0 +1,18 @@
+package com.seb_main_004.whosbook.member.dto;
+
+import com.seb_main_004.whosbook.member.entity.Member;
+import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public class AdminResponseDto {
+    Long totalMembers;
+
+    Member mostSubsripedMember;
+
+    List<Member> mostCurationMembers;
+
+    Long totalCurations;
+}
