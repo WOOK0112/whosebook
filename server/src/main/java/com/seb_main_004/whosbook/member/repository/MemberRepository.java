@@ -2,6 +2,7 @@ package com.seb_main_004.whosbook.member.repository;
 
 import com.seb_main_004.whosbook.member.dto.BestCuratorDto;
 import com.seb_main_004.whosbook.member.entity.Member;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByMemberId(long memberId);
 
     Optional<Member> findByNickname(String nickname);
+
     @Query(value = "SELECT m.member_id, m.email, m.image_url, m.introduction, m.created_at, m.updated_at, m.member_status, m.nickname, m.password, m.image_key, COUNT(s.subscriber) AS num_subscribers " +
     "FROM member m LEFT JOIN subscribe s ON m.member_id = s.subscribed_member " +
     "WHERE m.member_status = 'MEMBER_ACTIVE' " +
@@ -22,10 +24,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     "ORDER BY num_subscribers DESC", countQuery = "SELECT COUNT(*) FROM member", nativeQuery = true)
     Page<Member> findBestCurators(Pageable pageable);
 
+    //구독자가 가장 많은 멤버ID select
     @Query(value = "SELECT new com.seb_main_004.whosbook.member.dto.BestCuratorDto(m.memberId, m.email, m.nickname, m.introduction, m.imageUrl, SIZE(m.subscribers)) " +
     "FROM Member m LEFT JOIN m.subscribers " +
     "WHERE m.memberStatus = 'MEMBER_ACTIVE' " +
     "GROUP BY m " +
     "ORDER BY SIZE(m.subscribers) DESC")
     Page<BestCuratorDto> findBestCuratorsTestV2(Pageable pageable);
+
+    //게시글을 가장 많이 작성한 멤버 select
+    @Query("SELECT m " +
+        "FROM Member m JOIN m.curations c " +
+        "GROUP BY m " +
+        "ORDER BY COUNT(c) DESC")
+    List<Member> findMemberWithMostCurations();
 }
